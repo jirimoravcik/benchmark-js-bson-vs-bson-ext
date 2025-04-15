@@ -39,8 +39,10 @@ const mediumData = { data: generateLargeDataset(5_000) }; // A smaller dataset f
 // Pre-serialize for deserialization tests
 const bufferBigJS = BSON.serialize(bigData);
 const bufferBigExt = BSONExt.serialize(bigData);
+const bufferBigJSON = JSON.stringify(bigData);
 const bufferMediumJS = BSON.serialize(mediumData);
 const bufferMediumExt = BSONExt.serialize(mediumData);
+const bufferMediumJSON = JSON.stringify(mediumData);
 
 async function runWithConcurrency(fn, total = 500, concurrency = 10) {
     const tasks = Array.from({ length: total }, (_, i) => i);
@@ -80,11 +82,17 @@ suite
   .add('bson-ext serialize (single)', () => {
     BSONExt.serialize(bigData);
   }, { minSamples: SINGLE_TEST_MIN_SAMPLES }) // Why is this copy-pasted? Setting it at the root level doesn't work
+  .add('JSON stringify (single)', () => {
+    JSON.stringify(bigData);
+  }, { minSamples: SINGLE_TEST_MIN_SAMPLES }) // Why is this copy-pasted? Setting it at the root level doesn't work
   .add('js-bson deserialize (single)', () => {
     BSON.deserialize(bufferBigJS);
   }, { minSamples: SINGLE_TEST_MIN_SAMPLES }) // Why is this copy-pasted? Setting it at the root level doesn't work
   .add('bson-ext deserialize (single)', () => {
     BSONExt.deserialize(bufferBigExt);
+  }, { minSamples: SINGLE_TEST_MIN_SAMPLES }) // Why is this copy-pasted? Setting it at the root level doesn't work
+  .add('JSON parse (single)', () => {
+    JSON.parse(bufferBigJSON);
   }, { minSamples: SINGLE_TEST_MIN_SAMPLES }) // Why is this copy-pasted? Setting it at the root level doesn't work
   .on('cycle', (event) => {
     console.log(String(event.target));
@@ -92,15 +100,19 @@ suite
   .on('complete', async function () {
     const jsSer = await runWithConcurrency(() => BSON.serialize(mediumData));
     const extSer = await runWithConcurrency(() => BSONExt.serialize(mediumData));
+    const jsonSer = await runWithConcurrency(() => JSON.stringify(mediumData));
     const jsDes = await runWithConcurrency(() => BSON.deserialize(bufferMediumJS));
     const extDes = await runWithConcurrency(() => BSONExt.deserialize(bufferMediumExt));
+    const jsonDes = await runWithConcurrency(() => JSON.parse(bufferMediumJSON));
 
     console.log('\nConcurrent Results (on smaller data):');
     console.table({
       'js-bson serialize': jsSer,
       'bson-ext serialize': extSer,
+      'JSON stringify': jsonSer,
       'js-bson deserialize': jsDes,
       'bson-ext deserialize': extDes,
+      'JSON parse': jsonDes,
     });
   })
   .run({ async: true });
