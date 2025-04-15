@@ -1,0 +1,17 @@
+{
+    "name": "benchmark-js-bson-vs-bson-ext",
+    "version": "1.0.0",
+    "main": "index.js",
+    "scripts": {
+      "start": "node index.js"
+    },
+    "author": "",
+    "license": "ISC",
+    "description": "",
+    "dependencies": {
+      "async": "^3.2.6",
+      "benchmark": "^2.1.4",
+      "bson": "^6.10.3",
+      "bson-ext": "^4.0.3"
+    }
+  }
